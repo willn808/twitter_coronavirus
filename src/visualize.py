@@ -22,7 +22,25 @@ if args.percent:
     for k in counts[args.key]:
         counts[args.key][k] /= counts['_all'][k]
 
-# print the count values
+# get the top 10 keys, then flip them to low-to-high order
 items = sorted(counts[args.key].items(), key=lambda item: (item[1],item[0]), reverse=True)
-for k,v in items:
-    print(k,':',v)
+top10 = items[:10]
+top10.reverse()
+
+# split into x-axis labels and bar heights
+keys = [k for k,v in top10]
+values = [v for k,v in top10]
+
+# draw the bar graph and save it as a png
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+plt.bar(keys, values)
+plt.xlabel('language' if args.input_path.endswith('.lang') else 'country')
+plt.ylabel('number of tweets')
+plt.tight_layout()
+
+output_file = os.path.basename(args.input_path) + '_' + args.key.lstrip('#') + '.png'
+plt.savefig(output_file)
+print('saved', output_file)
